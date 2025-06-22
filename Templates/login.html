@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Recruiter Login</title>
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background: #ccc;
+      font-family: Arial, sans-serif;
+    }
+
+    .container {
+      display: flex;
+      gap: 40px;
+    }
+
+    .chat {
+      width: 300px;
+      height: 200px;
+      background: #eee;
+      padding: 20px;
+      border: 1px solid #aaa;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 20px;
+      font-size: 18px;
+    }
+
+    .left, .right {
+      background: #fff;
+      padding: 10px 15px;
+      max-width: 70%;
+      border-radius: 10px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
+
+    .left {
+      align-self: flex-start;
+      border-radius: 10px 10px 10px 0;
+    }
+
+    .right {
+      align-self: flex-end;
+      border-radius: 10px 10px 0 10px;
+    }
+
+    form.form {
+      background: #ddd;
+      padding: 30px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      width: 300px;
+    }
+
+    input {
+      padding: 8px;
+      font-size: 16px;
+      border: 1px solid #999;
+    }
+
+    button {
+      padding: 10px;
+      background: #cce8cc;
+      font-size: 18px;
+      border: none;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="chat" id="chatBox"></div>
+
+    <!-- ✅ Fixed form -->
+    <form class="form" method="POST" action="{{ url_for('login') }}">
+      <label>Email:
+        <input type="email" name="email" required />
+      </label>
+      <label>Password:
+        <input type="password" name="password" required />
+      </label>
+      <button type="submit">LOGIN</button>
+    </form>
+  </div>
+
+  <script>
+    const chatBox = document.getElementById('chatBox');
+    const chats = [
+      { question: "Process ?", answer: "Handled." },
+      { question: "Progress?", answer: "Waiting for you !" }
+    ];
+    let i = 0;
+
+    function showChat() {
+      chatBox.innerHTML = `<div class="left">${chats[i].question}</div>`;
+      setTimeout(() => {
+        chatBox.innerHTML += `<div class="right">${chats[i].answer}</div>`;
+        i = (i + 1) % chats.length;
+      }, 1000);
+    }
+
+    showChat();
+    setInterval(showChat, 4000);
+  </script>
+</body>
+</html>
