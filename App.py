@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, flash, jsonify, redirect, url_for, session
-import os, sqlite3
+import os, sqlite3, fitz
 from models_db import db, Recruiter
 from flask_sqlalchemy import SQLAlchemy
 
@@ -13,6 +13,20 @@ with app.app_context():
     db.create_all() 
 os.makedirs("uploads", exist_ok=True)
 os.makedirs("static", exist_ok=True)
+
+def extract_text_from_pdf(path):
+    doc = fitz.open(path)
+    return "\n".join(p.get_text() for p in doc)
+
+def extract_candidate_name(resume_text):
+    lines = resume_text.split('\n')[:5]
+    for line in lines:
+        line = line.strip()
+        if line and len(line.split()) <= 4 and not any(char.isdigit() for char in line):
+            words = line.split()
+            if len(words) >= 2 and all(word.isalpha() for word in words):
+                return ' '.join(words[:2])
+    return "there"
 
 @app.route('/')
 def loading():      
