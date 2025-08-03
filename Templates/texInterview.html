@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>BoltHire AI - Text Interview</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <style>
+    body {
+      background-color: #f7f9fc;
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    #switchModeBtn, #endInterviewBtn {
+      position: absolute;
+      top: 20px;
+      padding: 8px 12px;
+      border-radius: 6px;
+      border: none;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    #switchModeBtn {
+      right: 20px;
+      background-color: #fdd835;
+    }
+    #switchModeBtn:hover {
+      background-color: #fbc02d;
+    }
+
+    #endInterviewBtn {
+      left: 20px;
+      background-color: #ef5350;
+      color: white;
+    }
+    #endInterviewBtn:hover {
+      background-color: #d32f2f;
+    }
+
+    .chat-container {
+      flex: 1;
+      width: 90%;
+      max-width: 800px;
+      margin: 80px auto 20px;
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .chat-box {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+
+    .message {
+      max-width: 70%;
+      padding: 10px 15px;
+      border-radius: 20px;
+      margin-bottom: 10px;
+      line-height: 1.5;
+      word-wrap: break-word;
+      display: inline-block;
+      clear: both;
+    }
+
+    .interviewer {
+      background-color: #e3f2fd;
+      color: #1a237e;
+      float: left;
+      border-top-left-radius: 0;
+    }
+
+    .user {
+      background-color: #c8e6c9;
+      color: #2e7d32;
+      float: right;
+      border-top-right-radius: 0;
+    }
+
+    #typingIndicator {
+      margin: 0 20px 10px;
+      display: none;
+    }
+
+    .typing-dots {
+      display: inline-block;
+      width: 1em;
+      height: 1em;
+      border-radius: 50%;
+      background-color: gray;
+      animation: bounce 1s infinite;
+      animation-delay: 0s;
+    }
+    .typing-dots:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+    .typing-dots:nth-child(3) {
+      animation-delay: 0.4s;
+    }
+
+    @keyframes bounce {
+      0%, 80%, 100% {
+        transform: scale(0);
+        opacity: 0.3;
+      }
+      40% {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    .input-container {
+      display: flex;
+      padding: 10px 20px;
+      border-top: 1px solid #eee;
+    }
+
+    #userInput {
+      flex: 1;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 16px;
+    }
+
+    #sendBtn {
+      margin-left: 10px;
+      padding: 10px 15px;
+      background-color: #1a73e8;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    #sendBtn:hover {
+      background-color: #0c51b8;
+    }
+  </style>
+</head>
+
+<body>
+  <button id="switchModeBtn">Switch to Voice Mode </button>
+  <button id="endInterviewBtn">End Interview ⛔</button>
+
+  <div class="chat-container">
+    <div class="chat-box" id="chatBox"></div>
+    <div id="typingIndicator">
+      <span class="typing-dots"></span>
+      <span class="typing-dots"></span>
+      <span class="typing-dots"></span>
+    </div>
+    <div class="input-container">
+      <input type="text" id="userInput" placeholder="Type your response here..." />
+      <button id="sendBtn">Send</button>
+    </div>
+  </div>
+
+  <script>
+    const chatBox       = document.getElementById('chatBox');
+    const typingInd     = document.getElementById('typingIndicator');
+    const userInput     = document.getElementById('userInput');
+    const sendBtn       = document.getElementById('sendBtn');
+    const switchBtn     = document.getElementById('switchModeBtn');
+    const endBtn        = document.getElementById('endInterviewBtn');
+    let warnedOnce      = false;
+    const justSwitched  = localStorage.getItem('justSwitched') === 'true';
+
+    function appendMessage(content, cls) {
+      const d = document.createElement('div');
+      d.className = `message ${cls}`;
+      d.textContent = content;
+      chatBox.appendChild(d);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    async function requestNextQuestion() {
+      typingInd.style.display = 'block';
+      const res = await fetch('/next_question', { method: 'POST' });
+      const data = await res.json();
+      typingInd.style.display = 'none';
+      appendMessage(data.response, 'interviewer');
+    }
+
+    async function startInterview() {
+      const justSwitchedFlag = localStorage.getItem('justSwitched');
+      if (justSwitchedFlag) {
+        const savedQ = localStorage.getItem('switchedQuestion');
+        if (savedQ) {
+          appendMessage(savedQ, 'interviewer');
+        }
+        localStorage.removeItem('justSwitched');
+        localStorage.removeItem('switchedQuestion');
+        // await requestNextQuestion();
+      } else {
+        const res = await fetch('/start_interview');
+        const d   = await res.json();
+        appendMessage(d.response, 'interviewer');
+      }
+    }
+
+    async function sendAnswer() {
+      const txt = userInput.value.trim();
+      if (!txt) return;
+      appendMessage(txt, 'user');
+      userInput.value = '';
+
+      typingInd.style.display = 'block';
+      const res = await fetch('/ask', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ message: txt })
+      });
+      const data = await res.json();
+      typingInd.style.display = 'none';
+      appendMessage(data.response, 'interviewer');
+    }
+
+    sendBtn.addEventListener('click', sendAnswer);
+    userInput.addEventListener('keypress', e => { if (e.key==='Enter') sendAnswer(); });
+
+    switchBtn.addEventListener('click', async () => {
+      if (!warnedOnce) {
+        alert("Confirm Interview Mode Switch. You are about to change the interview mode. Please click the switch button again to confirm and proceed. Don't worry — we'll just continue from where we left off.");
+        warnedOnce = true;
+        return;
+      }
+      const res = await fetch('/switch_mode', { method: 'POST',  headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ force: true })
+  });
+      const data = await res.json();
+      localStorage.setItem('justSwitched','true');
+      if (data.question) {
+       localStorage.setItem('switchedQuestion', data.question);
+       }
+      window.location.href = '/vInterview';
+      // await fetch('/skip_question', { method: 'POST' });
+      // localStorage.setItem('justSwitched','true');
+      // window.location.href = '/vInterview';
+    });
+
+    endBtn.addEventListener('click', () => {
+     const confirmation = document.createElement('div');
+     confirmation.style.position = 'fixed';
+     confirmation.style.top = '0';
+     confirmation.style.left = '0';
+     confirmation.style.width = '100%';
+     confirmation.style.height = '100%';
+     confirmation.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+     confirmation.style.display = 'flex';
+     confirmation.style.justifyContent = 'center';
+     confirmation.style.alignItems = 'center';
+     confirmation.style.zIndex = '1000';
+
+     confirmation.innerHTML = `
+      <div style="background:white;padding:20px;border-radius:8px;max-width:400px;text-align:center;box-shadow:0 0 10px rgba(0,0,0,0.3)">
+        <p style="font-size:16px;font-weight:500;">This will <strong>force submit</strong> your interview and you won’t be able to revoke it.</p>
+        <p style="font-size:15px;">Click <strong>"End Interview"</strong> below to confirm.</p>
+        <div style="margin-top:20px;">
+          <button id="confirmEndBtn" style="background-color:#d32f2f;color:white;padding:8px 16px;border:none;border-radius:5px;margin-right:10px;cursor:pointer;">End Interview</button>
+          <button id="cancelEndBtn" style="background-color:#080808;color:white;padding:8px 16px;border:none;border-radius:5px;cursor:pointer;">Cancel</button>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(confirmation);
+
+    document.getElementById('cancelEndBtn').onclick = () => {
+      document.body.removeChild(confirmation);
+    };
+
+    document.getElementById('confirmEndBtn').onclick = async () => {
+      await fetch('/end_interview', { method: 'POST' });  //Backend endpoint
+      window.location.href = '/candidate_feedback';       //Redirect to feedback
+    };
+  });
+
+   
+
+
+    window.onload = startInterview;
+  </script>
+</body>
+</html>
+
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>BoltHire AI - Text Interview</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <style>
+    body {
+      background-color: #f7f9fc;
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    #switchModeBtn {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background-color: #fdd835;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    #switchModeBtn:hover {
+      background-color: #fbc02d;
+    }
+
+    .chat-container {
+      flex: 1;
+      width: 90%;
+      max-width: 800px;
+      margin: 80px auto 20px;
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .chat-box {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+
+    .message {
+      margin-bottom: 15px;
+      line-height: 1.5;
+    }
+    .interviewer {
+      text-align: left;
+      color: #1a237e;
+      font-weight: bold;
+    }
+    .user {
+      text-align: right;
+      color: #2e7d32;
+      font-weight: bold;
+    }
+
+    #typingIndicator {
+      font-style: italic;
+      color: gray;
+      margin: 0 20px 10px;
+      display: none;
+    }
+
+    .input-container {
+      display: flex;
+      padding: 10px 20px;
+      border-top: 1px solid #eee;
+    }
+
+    #userInput {
+      flex: 1;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 16px;
+    }
+
+    #sendBtn {
+      margin-left: 10px;
+      padding: 10px 15px;
+      background-color: #1a73e8;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    #sendBtn:hover {
+      background-color: #0c51b8;
+    }
+  </style>
+</head>
+
+<body>
+  <button id="switchModeBtn">Switch to Voice Mode 🎙️</button>
+
+  <div class="chat-container">
+    <div class="chat-box" id="chatBox"></div>
+    <div id="typingIndicator">Typing...</div>
+    <div class="input-container">
+      <input type="text" id="userInput" placeholder="Type your response here..." />
+      <button id="sendBtn">Send</button>
+    </div>
+  </div>
+
+  <script>
+    const chatBox       = document.getElementById('chatBox');
+    const typingInd     = document.getElementById('typingIndicator');
+    const userInput     = document.getElementById('userInput');
+    const sendBtn       = document.getElementById('sendBtn');
+    const switchBtn     = document.getElementById('switchModeBtn');
+    let warnedOnce      = false;
+    const justSwitched  = localStorage.getItem('justSwitched') === 'true';
+
+    function appendMessage(content, cls) {
+      const d = document.createElement('div');
+      d.className = `message ${cls}`;
+      d.textContent = content;
+      chatBox.appendChild(d);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    async function requestNextQuestion() {
+      typingInd.style.display = 'block';
+      const res = await fetch('/next_question', { method: 'POST' });
+      const data = await res.json();
+      typingInd.style.display = 'none';
+      appendMessage(data.response, 'interviewer');
+    }
+
+    async function startInterview() {
+      if (justSwitched) {
+        localStorage.removeItem('justSwitched');
+        await requestNextQuestion();
+      } else {
+        // initial question
+        const res = await fetch('/start_interview');
+        const d   = await res.json();
+        appendMessage(d.response, 'interviewer');
+      }
+    }
+
+    async function sendAnswer() {
+      const txt = userInput.value.trim();
+      if (!txt) return;
+      appendMessage(txt, 'user');
+      userInput.value = '';
+
+      typingInd.style.display = 'block';
+      const res = await fetch('/ask', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ message: txt })
+      });
+      const data = await res.json();
+      typingInd.style.display = 'none';
+      appendMessage(data.response, 'interviewer');
+    }
+
+    sendBtn.addEventListener('click', sendAnswer);
+    userInput.addEventListener('keypress', e => { if (e.key==='Enter') sendAnswer(); });
+
+    switchBtn.addEventListener('click', async () => {
+      if (!warnedOnce) {
+        alert("You can't continue with the same question if you switch modes now. Click again to switch modes.");
+        warnedOnce = true;
+        return;
+      }
+      // perform the skip & switch
+      await fetch('/skip_question', { method: 'POST' });
+      localStorage.setItem('justSwitched','true');
+      window.location.href = '/vInterview';
+    });
+
+    window.onload = startInterview;
+  </script>
+</body>
+</html> -->

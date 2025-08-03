@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>BoltHire AI - Voice Interview</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <style>
+    body {
+      background-color: #f0f4f8;
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    #toggle-btn {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background-color: #555;
+      color: #f8f8f5;
+      padding: 8px 14px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    #end-btn {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      background-color: #db4040;
+      color: #fff;
+      padding: 8px 14px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    #mic-container {
+      margin-top: 80px;
+      cursor: pointer;
+    }
+    #mic-icon {
+      width: 120px;
+      transition: opacity 0.3s ease;
+    }
+    .pulse {
+      animation: pulse 1.5s infinite;
+    }
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.15); }
+      100% { transform: scale(1); }
+    }
+    #instruction {
+      margin-top: 20px;
+      font-size: 18px;
+      color: #555;
+      opacity: 0;
+      visibility: hidden;
+    }
+    .fade-in-out {
+      animation: fadeOut 5s forwards;
+    }
+    @keyframes fadeOut {
+      0% { opacity: 1; visibility: visible; }
+      90% { opacity: 0.2; }
+      100% { opacity: 0; visibility: hidden; }
+    }
+    #ai-response {
+      margin-top: 40px;
+      padding: 20px;
+      background: #e0ecff;
+      border-radius: 10px;
+      font-size: 18px;
+      max-width: 600px;
+      text-align: center;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <button id="toggle-btn">Switch to Text Mode</button>
+  <button id="end-btn" type="button">End Interview ⛔</button>
+
+  <h1></h1>
+  <div id="mic-container">
+    <img id="mic-icon" src="{{ url_for('static', filename='mic-icon.png') }}" alt="Mic">
+  </div>
+  <div id="instruction">Click the mic icon to record your answer.</div>
+  <div id="ai-response"></div>
+
+  <script>
+    let isRecording = false, isSpeaking = false;
+    let mediaRecorder, mediaStream;
+    let switchForce = false;
+
+    const micContainer = document.getElementById('mic-container');
+    const micIcon = document.getElementById('mic-icon');
+    const aiResponseDiv = document.getElementById('ai-response');
+    const toggleBtn = document.getElementById('toggle-btn');
+    const endBtn = document.getElementById('end-btn');
+    const instruction = document.getElementById('instruction');
+
+    function pulse(on) {
+      micIcon.style.opacity = on ? '0.6' : '1.0';
+      micContainer.classList.toggle('pulse', on);
+    }
+
+    function showText(txt) {
+      aiResponseDiv.style.display = 'block';
+      aiResponseDiv.textContent = txt;
+    }
+
+    function showInstructionAfterSpeech() {
+      instruction.classList.remove('fade-in-out');
+      instruction.style.opacity = '1';
+      instruction.style.visibility = 'visible';
+      setTimeout(() => {
+        instruction.classList.add('fade-in-out');
+      }, 100); // slight delay to allow rendering
+    }
+
+    async function play(text) {
+      isSpeaking = true; pulse(true);
+      showText('');
+      instruction.style.opacity = '0'; // hide during AI speaking
+      instruction.style.visibility = 'hidden';
+
+      await fetch('/speak', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ text })
+      });
+      const audio = new Audio('/static/output.wav');
+      audio.onplay = () => showText(text);
+      audio.onended = () => {
+        isSpeaking = false;
+        pulse(false);
+        showInstructionAfterSpeech();
+      };
+      audio.play();
+    }
+    window.onload = async () => {
+      const justSwitched = localStorage.getItem('justSwitched');
+      if (justSwitched) {
+    // We just switched modes — use stored question
+         const savedQ = localStorage.getItem('switchedQuestion');
+         if (savedQ) {
+             await play(savedQ);
+         }
+         localStorage.removeItem('justSwitched');
+         localStorage.removeItem('switchedQuestion');
+       } else {
+    // Normal start
+         const res = await fetch('/start_interview', { method: 'POST' });
+         const d = await res.json();
+         await play(d.response);
+       }
+};
+
+    // window.onload = async () => {
+    //   const res = await fetch('/start_interview', { method: 'POST' });
+    //   const d = await res.json();
+    //   await play(d.response);
+    // };
+
+    micContainer.addEventListener('click', async () => {
+      if (isSpeaking) return;
+      if (!isRecording) {
+        isRecording = true; pulse(true);
+        mediaStream = await navigator.mediaDevices.getUserMedia({audio:true});
+        mediaRecorder = new MediaRecorder(mediaStream);
+        const chunks = [];
+        mediaRecorder.ondataavailable = e => chunks.push(e.data);
+        mediaRecorder.onstop = async () => {
+          pulse(false);
+          isRecording = false;
+          mediaStream.getTracks().forEach(t => t.stop());
+          const blob = new Blob(chunks, {type: 'audio/webm'});
+          const fd = new FormData(); fd.append('audio', blob, 'in.webm');
+
+          const tr = await fetch('/transcribe', {method: 'POST', body: fd});
+          const tdata = await tr.json();
+
+          const ask = await fetch('/ask', {
+            method: 'POST',
+            headers: {'Content-Type':'application/json'},
+            body: JSON.stringify({ message: tdata.transcript })
+          });
+
+          const d = await ask.json();
+          await play(d.response);
+
+          if (d.interview_over) {
+            setTimeout(() => {
+              window.location.href = '/candidate_feedback';
+            }, 1000);
+          }
+        };
+        mediaRecorder.start();
+      } else {
+        mediaRecorder.stop();
+      }
+    });
+
+    toggleBtn.addEventListener('click', async () => {
+      const resp = await fetch('/switch_mode', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ force: switchForce })
+      });
+      const data = await resp.json();
+      if (!data.allowed) {
+        alert(data.message);
+        switchForce = true;
+      } else {
+        localStorage.setItem('justSwitched', 'true');
+        if (data.question) {
+          localStorage.setItem('switchedQuestion', data.question);
+        }
+        window.location.href = data.new_mode === 'text' ? '/texInterview' : '/vInterview';
+      }
+    });
+
+    endBtn.addEventListener('click', () => {
+      const confirmation = document.createElement('div');
+      confirmation.style.position = 'fixed';
+      confirmation.style.top = '0';
+      confirmation.style.left = '0';
+      confirmation.style.width = '100%';
+      confirmation.style.height = '100%';
+      confirmation.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+      confirmation.style.display = 'flex';
+      confirmation.style.justifyContent = 'center';
+      confirmation.style.alignItems = 'center';
+      confirmation.style.zIndex = '1000';
+
+      confirmation.innerHTML = `
+        <div style="background:white;padding:20px;border-radius:8px;max-width:400px;text-align:center;box-shadow:0 0 10px rgba(0,0,0,0.3)">
+          <p style="font-size:16px;font-weight:500;">This will <strong>force submit</strong> your interview and you won’t be able to revoke it.</p>
+          <p style="font-size:15px;">Click the <strong>"End Interview"</strong> button below to confirm.</p>
+          <div style="margin-top:20px;">
+            <button id="confirmEndBtn" style="background-color:#d32f2f;color:white;padding:8px 16px;border:none;border-radius:5px;margin-right:10px;cursor:pointer;">End Interview</button>
+            <button id="cancelEndBtn" style="background-color:#080808;color:white;padding:8px 16px;border:none;border-radius:5px;cursor:pointer;">Cancel</button>
+          </div>
+        </div>
+      `;
+
+      document.body.appendChild(confirmation);
+
+      document.getElementById('cancelEndBtn').onclick = () => {
+        document.body.removeChild(confirmation);
+      };
+
+      document.getElementById('confirmEndBtn').onclick = async () => {
+        await fetch('/end_interview', { method: 'POST' });
+        window.location.href = '/candidate_feedback';
+      };
+    });
+  </script>
+</body>
+</html>
+
+
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>BoltHire AI - Voice Interview</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <style>
+    body {
+      background-color: #f0f4f8;
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    #toggle-btn {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background-color: #555;
+      color: #fff;
+      padding: 8px 14px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    /* New End Interview button */
+    #end-btn {
+      position: absolute;
+      top: 20p;
+      left: 20px;
+      background-color: #d9534f;
+      color: #fff;
+      padding: 8px 14px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    #mic-container {
+      margin-top: 80px;
+      cursor: pointer;
+    }
+    #mic-icon {
+      width: 120px;
+      transition: opacity 0.3s ease;
+    }
+    .pulse {
+      animation: pulse 1.5s infinite;
+    }
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.15); }
+      100% { transform: scale(1); }
+    }
+    #instruction {
+      margin-top: 20px;
+      font-size: 18px;
+      color: #555;
+      animation: fadeOut 5s forwards;
+    }
+    @keyframes fadeOut {
+      0% { opacity: 1; }
+      90% { opacity: .2; }
+      100% { opacity: 0; visibility: hidden; }
+    }
+    #ai-response {
+      margin-top: 40px;
+      padding: 20px;
+      background: #e0ecff;
+      border-radius: 10px;
+      font-size: 18px;
+      max-width: 600px;
+      text-align: center;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <button id="toggle-btn">Switch to Text Mode</button>
+  New End Interview button -->
+  <!-- <button id="end-btn" type="button">End Interview</button>
+
+  <h1></h1>
+  <div id="mic-container">
+    <img id="mic-icon" src="{{ url_for('static', filename='mic-icon.png') }}" alt="Mic">
+  </div>
+  <div id="instruction">Click the mic icon to record your answer.</div>
+  <div id="ai-response"></div>
+
+  <script>
+    let isRecording = false, isSpeaking = false;
+    let mediaRecorder, mediaStream;
+    let switchForce = false;
+
+    const micContainer   = document.getElementById('mic-container');
+    const micIcon        = document.getElementById('mic-icon');
+    const aiResponseDiv  = document.getElementById('ai-response');
+    const toggleBtn      = document.getElementById('toggle-btn');
+    const endBtn         = document.getElementById('end-btn'); // new button
+
+    function pulse(on) {
+      micIcon.style.opacity = on ? '0.6' : '1.0';
+      micContainer.classList.toggle('pulse', on);
+    }
+
+    function showText(txt) {
+      aiResponseDiv.style.display = 'block';
+      aiResponseDiv.textContent = txt;
+    }
+
+    async function play(text) {
+      isSpeaking = true; pulse(true);
+      showText('');  // clear previous
+      await fetch('/speak', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ text })
+      });
+      const audio = new Audio('/static/output.wav');
+      audio.onplay = () => showText(text);
+      audio.onended = () => { isSpeaking=false; pulse(false); };
+      audio.play();
+    }
+
+    // Fetch the (continuing) interview question
+    window.onload = async () => {
+      const res = await fetch('/start_interview', { method: 'POST' });
+      const d   = await res.json();
+      await play(d.response);
+    };
+
+    // RECORD / TRANSCRIBE / ASK
+    micContainer.addEventListener('click', async () => {
+      if (isSpeaking) return;
+      if (!isRecording) {
+        isRecording = true; pulse(true);
+        mediaStream = await navigator.mediaDevices.getUserMedia({audio:true});
+        mediaRecorder = new MediaRecorder(mediaStream);
+        const chunks = [];
+        mediaRecorder.ondataavailable = e => chunks.push(e.data);
+        mediaRecorder.onstop = async () => {
+          pulse(false);
+          isRecording = false;
+          mediaStream.getTracks().forEach(t=>t.stop());
+          const blob = new Blob(chunks,{type:'audio/webm'});
+          const fd = new FormData(); fd.append('audio',blob,'in.webm');
+          // transcribe
+          const tr = await fetch('/transcribe',{method:'POST',body:fd});
+          const tdata = await tr.json();
+          // send to /ask
+          const ask = await fetch('/ask',{
+            method:'POST',
+            headers:{'Content-Type':'application/json'},
+            body: JSON.stringify({ message: tdata.transcript })
+          });
+          const d = await ask.json();
+          await play(d.response);
+          if (d.interview_over) {
+            setTimeout(() => {
+              window.location.href = '/candidate_feedback';
+            }, 1000);  // wait for audio to finish before redirecting
+          }
+
+        };
+        mediaRecorder.start();
+      } else {
+        mediaRecorder.stop();
+      }
+    });
+
+    // SWITCH MODE
+    toggleBtn.addEventListener('click', async () => {
+      const resp = await fetch('/switch_mode', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ force: switchForce })
+      });
+      const data = await resp.json();
+      if (!data.allowed) {
+        alert(data.message);
+        switchForce = true;
+      } else {
+        localStorage.setItem('justSwitched','true');
+        window.location.href = data.new_mode === 'text' ? '/texInterview' : '/vInterview';
+      }
+    });
+
+    // END INTERVIEW
+    endBtn.addEventListener('click', () => {
+     const confirmation = document.createElement('div');
+     confirmation.style.position = 'fixed';
+     confirmation.style.top = '0';
+     confirmation.style.left = '0';
+     confirmation.style.width = '100%';
+     confirmation.style.height = '100%';
+     confirmation.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+     confirmation.style.display = 'flex';
+     confirmation.style.justifyContent = 'center';
+     confirmation.style.alignItems = 'center';
+     confirmation.style.zIndex = '1000';
+
+     confirmation.innerHTML = `
+      <div style="background:white;padding:20px;border-radius:8px;max-width:400px;text-align:center;box-shadow:0 0 10px rgba(0,0,0,0.3)">
+        <p style="font-size:16px;font-weight:500;">This will <strong>force submit</strong> your interview and you won’t be able to revoke it.</p>
+        <p style="font-size:15px;">Click <strong>"End Interview"</strong> below to confirm.</p>
+        <div style="margin-top:20px;">
+          <button id="confirmEndBtn" style="background-color:#d32f2f;color:white;padding:8px 16px;border:none;border-radius:5px;margin-right:10px;cursor:pointer;">End Interview</button>
+          <button id="cancelEndBtn" style="background-color:#aaa;color:white;padding:8px 16px;border:none;border-radius:5px;cursor:pointer;">Cancel</button>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(confirmation);
+
+    document.getElementById('cancelEndBtn').onclick = () => {
+      document.body.removeChild(confirmation);
+    };
+
+    document.getElementById('confirmEndBtn').onclick = async () => {
+      await fetch('/end_interview', { method: 'POST' });  // Backend endpoint
+      window.location.href = '/candidate_feedback';       // Redirect to feedback
+    };
+  });
+  </script>
+</body>
+</html> -->
+
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>BoltHire AI - Voice Interview</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <style>
+    body {
+      background-color: #f0f4f8;
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    #toggle-btn {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background-color: #555;
+      color: #fff;
+      padding: 8px 14px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    #mic-container {
+      margin-top: 80px;
+      cursor: pointer;
+    }
+    #mic-icon {
+      width: 120px;
+      transition: opacity 0.3s ease;
+    }
+    .pulse {
+      animation: pulse 1.5s infinite;
+    }
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.15); }
+      100% { transform: scale(1); }
+    }
+    #instruction {
+      margin-top: 20px;
+      font-size: 18px;
+      color: #555;
+      animation: fadeOut 5s forwards;
+    }
+    @keyframes fadeOut {
+      0% { opacity: 1; }
+      90% { opacity: .2; }
+      100% { opacity: 0; visibility: hidden; }
+    }
+    #ai-response {
+      margin-top: 40px;
+      padding: 20px;
+      background: #e0ecff;
+      border-radius: 10px;
+      font-size: 18px;
+      max-width: 600px;
+      text-align: center;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <button id="toggle-btn">Switch to Text Mode</button>
+  <h1></h1>
+  <div id="mic-container">
+    <img id="mic-icon" src="{{ url_for('static', filename='mic-icon.png') }}" alt="Mic">
+  </div>
+  <div id="instruction">Click the mic icon to record your answer.</div>
+  <div id="ai-response"></div>
+
+  <script>
+    let isRecording = false, isSpeaking = false;
+    let mediaRecorder, mediaStream;
+    let switchForce = false;
+
+    const micContainer   = document.getElementById('mic-container');
+    const micIcon        = document.getElementById('mic-icon');
+    const aiResponseDiv  = document.getElementById('ai-response');
+    const toggleBtn      = document.getElementById('toggle-btn');
+
+    function pulse(on) {
+      micIcon.style.opacity = on ? '0.6' : '1.0';
+      micContainer.classList.toggle('pulse', on);
+    }
+
+    function showText(txt) {
+      aiResponseDiv.style.display = 'block';
+      aiResponseDiv.textContent = txt;
+    }
+
+    async function play(text) {
+      isSpeaking = true; pulse(true);
+      showText('');  // clear previous
+      await fetch('/speak', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ text })
+      });
+      const audio = new Audio('/static/output.wav');
+      audio.onplay = () => showText(text);
+      audio.onended = () => { isSpeaking=false; pulse(false); };
+      audio.play();
+    }
+
+    // Fetch the (continuing) interview question
+    window.onload = async () => {
+      const res = await fetch('/start_interview', { method: 'POST' });
+      const d   = await res.json();
+      await play(d.response);
+    };
+
+    // RECORD / TRANSCRIBE / ASK
+    micContainer.addEventListener('click', async () => {
+      if (isSpeaking) return;
+      if (!isRecording) {
+        isRecording = true; pulse(true);
+        mediaStream = await navigator.mediaDevices.getUserMedia({audio:true});
+        mediaRecorder = new MediaRecorder(mediaStream);
+        const chunks = [];
+        mediaRecorder.ondataavailable = e => chunks.push(e.data);
+        mediaRecorder.onstop = async () => {
+          pulse(false);
+          isRecording = false;
+          mediaStream.getTracks().forEach(t=>t.stop());
+          const blob = new Blob(chunks,{type:'audio/webm'});
+          const fd = new FormData(); fd.append('audio',blob,'in.webm');
+          // transcribe
+          const tr = await fetch('/transcribe',{method:'POST',body:fd});
+          const tdata = await tr.json();
+          // send to /ask
+          const ask = await fetch('/ask',{
+            method:'POST',
+            headers:{'Content-Type':'application/json'},
+            body: JSON.stringify({ message: tdata.transcript })
+          });
+          const d = await ask.json();
+          await play(d.response);
+        };
+        mediaRecorder.start();
+      } else {
+        mediaRecorder.stop();
+      }
+    });
+
+    // SWITCH MODE
+    toggleBtn.addEventListener('click', async () => {
+      const resp = await fetch('/switch_mode', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ force: switchForce })
+      });
+      const data = await resp.json();
+      if (!data.allowed) {
+        alert(data.message);
+        switchForce = true;
+      } else {
+        // clear flag and go
+        localStorage.setItem('justSwitched','true');
+        window.location.href = data.new_mode === 'text' ? '/texInterview' : '/vInterview';
+      }
+    });
+  </script>
+</body>
+</html> -->
