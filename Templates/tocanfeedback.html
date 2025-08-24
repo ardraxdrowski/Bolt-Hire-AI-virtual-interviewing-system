@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Bolt-Hire AI - Interview Complete</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #ffffff;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      text-align: center;
+      color: #222;
+    }
+
+    .container {
+      max-width: 600px;
+      padding: 20px;
+    }
+
+    .logo {
+      width: 120px;
+      height: auto;
+      margin-bottom: 20px;
+    }
+
+    h1 {
+      font-size: 28px;
+      font-weight: bold;
+      margin-bottom: 20px;
+    }
+
+    p {
+      font-size: 17px;
+      line-height: 1.6;
+    }
+
+    .feedback-invite {
+      margin-top: 60px;
+      font-size: 16px;
+    }
+
+    .feedback-button {
+      margin-top: 15px;
+      padding: 10px 20px;
+      background-color: #ccc;
+      color: black;
+      border: none;
+      border-radius: 4px;
+      font-size: 16px;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+      transition: background-color 0.3s;
+    }
+
+    .feedback-button:hover {
+      background-color: #bbb;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <img src="{{ url_for('static', filename='logo2.png') }}" alt="Bolt-Hire AI Logo" class="logo" />
+    <h1>BOLT-HIRE AI</h1>
+    <p>Thanks for the time.<br>You’ll hear back from us soon!</p>
+
+    <div class="feedback-invite">
+      <p>Your feedback drives us ahead.<br>Care to take some time and gift us your feedback?</p>
+      <a href="{{ url_for('submit_feedback') }}" class="feedback-button">Feedback Form</a>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,203 @@
+<!-- <!DOCTYPE html>
+<html>
+<head>
+    <title>Guidelines and terms of use - Bolt-Hire AI</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" class="top-right-logo">
+
+    <div class="Guidelines and terms of use-container">
+        <h2>Guidelines and Terms of Use</h2>
+        <p class="subtitle">Read up before you leap in!</p>
+
+        <div class="scroll-box">
+            <div class="scroll-section">
+                <strong>Instructions</strong>
+                <p>• Ensure camera and mic are working.<br>
+                • Be in a quiet environment.<br>
+                • Answer clearly and honestly.<br>
+                • Click 'Proceed' only when ready.</p>
+            </div>
+            <div class="scroll-section">
+                <strong>Terms & Conditions</strong>
+                <p>• Your data may be recorded for evaluation.<br>
+                • Do not refresh or leave during interview.<br>
+                • Misuse may result in disqualification.<br>
+                • By proceeding, you agree to these terms.</p>
+            </div>
+        </div>
+
+        <div class="checkboxes">
+            <label><input type="checkbox" id="instChk"> I have read and understood all the instructions.</label><br>
+            <label><input type="checkbox" id="termsChk"> I acknowledge that I have read, understood and agree to all the terms and conditions enlisted.</label>
+        </div>
+
+        <button id="proceedBtn" disabled>Proceed to interview</button>
+    </div>
+
+    <script>
+        const chk1 = document.getElementById("instChk");
+        const chk2 = document.getElementById("termsChk");
+        const btn = document.getElementById("proceedBtn");
+
+        function toggleBtn() {
+            btn.disabled = !(chk1.checked && chk2.checked);
+        }
+
+        chk1.addEventListener("change", toggleBtn);
+        chk2.addEventListener("change", toggleBtn);
+
+        btn.addEventListener("click", () => {
+            if (chk1.checked && chk2.checked) {
+                window.location.href = "/vInterview";
+            } else {
+                alert("Please check both boxes to proceed.");
+            }
+        });
+    </script>
+</body>
+</html> -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Guidelines and Terms of Use - BoltHire AI</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+      /* Minimal inline styling in case style.css is missing */
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 1.5rem;
+        background: #f9f9f9;
+        color: #333;
+      }
+      .top-right-logo {
+        position: fixed;
+        top: 1rem;
+        right: 1rem;
+        width: 120px;
+        height: auto;
+      }
+      .guidelines-container {
+        max-width: 600px;
+        margin: 5rem auto 2rem;
+        background: white;
+        padding: 2rem;
+        box-shadow: 0 0 10px #ccc;
+        border-radius: 8px;
+      }
+      h2 {
+        text-align: center;
+        margin-bottom: 0.2rem;
+        color: #0056d2;
+      }
+      .subtitle {
+        text-align: center;
+        margin-bottom: 1.5rem;
+        color: #555;
+        font-style: italic;
+      }
+      .scroll-box {
+        border: 1px solid #ddd;
+        max-height: 300px;
+        overflow-y: auto;
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+        background: #fafafa;
+        border-radius: 6px;
+      }
+      .scroll-section {
+        margin-bottom: 1rem;
+      }
+      strong {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-size: 1.1rem;
+        color: #003e7e;
+      }
+      .checkboxes label {
+        display: block;
+        margin-bottom: 1rem;
+        font-size: 1rem;
+      }
+      #proceedBtn {
+        background-color: #0056d2;
+        color: white;
+        padding: 0.8rem 2rem;
+        border: none;
+        border-radius: 5px;
+        font-size: 1.1rem;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+        width: 100%;
+      }
+      #proceedBtn:disabled {
+        background-color: #9bbcf9;
+        cursor: not-allowed;
+      }
+    </style>
+</head>
+<body>
+    <img src="{{ url_for('static', filename='logo2.png') }}" alt="BoltHire AI Logo" class="top-right-logo" />
+
+    <div class="guidelines-container">
+        <h2>Guidelines and Terms of Use</h2>
+        <p class="subtitle">Read up before you leap in!</p>
+
+        <div class="scroll-box" tabindex="0" aria-label="Instructions and Terms">
+            <div class="scroll-section">
+                <strong>Instructions</strong>
+                <p>
+                    • Ensure camera and mic are working.<br>
+                    • Be in a quiet environment.<br>
+                    • Answer clearly and honestly.<br>
+                    • Interview will be beginning in voice mode by default. You can always use the switch button to switch between voice and text modes.<br>
+                    • Ending interview forcefully is an irrevocable action. If clicked accidentally, press "cancel" to continue the interview. <br>
+                    • Click 'Proceed' only when ready as this will take you to the interview room directly.<br>
+                    • Once in the room, wait for the AI to speak and then take your time to think and respond accordingly.<br>
+                    • Any instance of malpractice or usage of abusive language will lead to disqualification without mercy.
+                </p>
+            </div>
+            <div class="scroll-section">
+                <strong>Terms & Conditions</strong>
+                <p>
+                    • Your data may be recorded for evaluation.<br>
+                    • Do not refresh or leave during interview.<br>
+                    • Misuse may result in disqualification.<br>
+                    • By proceeding, you agree to these terms.
+                </p>
+            </div>
+        </div>
+
+        <div class="checkboxes">
+            <label><input type="checkbox" id="instChk" /> I have read and understood all the instructions.</label>
+            <label><input type="checkbox" id="termsChk" /> I acknowledge that I have read, understood, and agree to all the terms and conditions enlisted.</label>
+        </div>
+
+        <button id="proceedBtn" disabled>Proceed to interview</button>
+    </div>
+
+    <script>
+        const chk1 = document.getElementById("instChk");
+        const chk2 = document.getElementById("termsChk");
+        const btn = document.getElementById("proceedBtn");
+
+        function toggleBtn() {
+            btn.disabled = !(chk1.checked && chk2.checked);
+        }
+
+        chk1.addEventListener("change", toggleBtn);
+        chk2.addEventListener("change", toggleBtn);
+
+        btn.addEventListener("click", () => {
+            if (chk1.checked && chk2.checked) {
+                window.location.href = "/vInterview";
+            } else {
+                alert("Please check both boxes to proceed.");
+            }
+        });
+    </script>
+</body>
+</html>
