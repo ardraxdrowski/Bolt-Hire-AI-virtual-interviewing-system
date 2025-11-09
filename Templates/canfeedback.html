@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>BOLT-HIRE AI - Feedback</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      margin: 40px auto;
+      color: #222;
+      max-width: 800px;
+    }
+
+    h1 {
+      text-align: center;
+      font-weight: bold;
+    }
+
+    .logo {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+
+    .logo img {
+      width: 100px;
+      height: auto;
+    }
+
+    .section {
+      margin-bottom: 30px;
+    }
+
+    .stars {
+      direction: rtl;
+      unicode-bidi: bidi-override;
+      display: inline-block;
+    }
+
+    .stars input {
+      display: none;
+    }
+
+    .stars label {
+      font-size: 25px;
+      color: #ccc;
+      cursor: pointer;
+    }
+
+    .stars input:checked ~ label,
+    .stars label:hover,
+    .stars label:hover ~ label {
+      color: #f5b301;
+    }
+
+    .radio-group {
+      display: flex;
+      gap: 20px;
+      margin-top: 10px;
+    }
+
+    .textarea {
+      width: 100%;
+      height: 60px;
+      padding: 8px;
+      font-size: 14px;
+      margin-top: 10px;
+      border: 1px solid #ccc;
+      resize: vertical;
+      background: #f6f6f6;
+    }
+
+    button {
+      padding: 12px 30px;
+      background-color: #333;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      font-size: 16px;
+      cursor: pointer;
+      display: block;
+      margin: 30px auto 0;
+    }
+
+    label {
+      margin-right: 10px;
+    }
+
+    p {
+      font-size: 17px;
+      margin-bottom: 5px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="logo">
+    <img src="/static/logo2.png" alt="BOLT-HIRE AI Logo">
+  </div>
+
+  <h1>BOLT-HIRE AI</h1>
+
+ 
+  <form id="feedbackForm">
+
+    <!-- rating questions -->
+    <div class="section">
+      <p>Was the interview interface easy to use?</p>
+      <div class="stars">
+        <input type="radio" name="interface" id="interface5" value="5"><label for="interface5">★</label>
+        <input type="radio" name="interface" id="interface4" value="4"><label for="interface4">★</label>
+        <input type="radio" name="interface" id="interface3" value="3"><label for="interface3">★</label>
+        <input type="radio" name="interface" id="interface2" value="2"><label for="interface2">★</label>
+        <input type="radio" name="interface" id="interface1" value="1"><label for="interface1">★</label>
+      </div>
+    </div>
+
+    <div class="section">
+      <p>Were the questions relevant to the role you applied for?</p>
+      <div class="stars">
+        <input type="radio" name="relevance" id="relevance5" value="5"><label for="relevance5">★</label>
+        <input type="radio" name="relevance" id="relevance4" value="4"><label for="relevance4">★</label>
+        <input type="radio" name="relevance" id="relevance3" value="3"><label for="relevance3">★</label>
+        <input type="radio" name="relevance" id="relevance2" value="2"><label for="relevance2">★</label>
+        <input type="radio" name="relevance" id="relevance1" value="1"><label for="relevance1">★</label>
+      </div>
+    </div>
+
+    <div class="section">
+      <p>Was the interview flow realistic?</p>
+      <div class="stars">
+        <input type="radio" name="flow" id="flow5" value="5"><label for="flow5">★</label>
+        <input type="radio" name="flow" id="flow4" value="4"><label for="flow4">★</label>
+        <input type="radio" name="flow" id="flow3" value="3"><label for="flow3">★</label>
+        <input type="radio" name="flow" id="flow2" value="2"><label for="flow2">★</label>
+        <input type="radio" name="flow" id="flow1" value="1"><label for="flow1">★</label>
+      </div>
+    </div>
+
+    <div class="section">
+      <p>How comfortable did you feel during the interview?</p>
+      <div class="stars">
+        <input type="radio" name="comfort" id="comfort5" value="5"><label for="comfort5">★</label>
+        <input type="radio" name="comfort" id="comfort4" value="4"><label for="comfort4">★</label>
+        <input type="radio" name="comfort" id="comfort3" value="3"><label for="comfort3">★</label>
+        <input type="radio" name="comfort" id="comfort2" value="2"><label for="comfort2">★</label>
+        <input type="radio" name="comfort" id="comfort1" value="1"><label for="comfort1">★</label>
+      </div>
+    </div>
+
+    <!-- Radio groups -->
+    <div class="section">
+      <p>Which interaction mode did you prefer?</p>
+      <div class="radio-group">
+        <label><input type="radio" name="mode" value="voice"> Voice</label>
+        <label><input type="radio" name="mode" value="text"> Text</label>
+      </div>
+    </div>
+
+    <div class="section">
+      <p>Did you face any issues or bugs during the interview?</p>
+      <div class="radio-group">
+        <label><input type="radio" name="issues" value="yes"> Yes</label>
+        <label><input type="radio" name="issues" value="no"> No</label>
+      </div>
+      <textarea class="textarea" name="issue_details" placeholder="Please specify the details....."></textarea>
+    </div>
+
+    <!-- suggestions -->
+    <div class="section">
+      <p>Any suggestions to improve the experience?</p>
+      <textarea class="textarea" name="suggestions" placeholder="Please specify the details....."></textarea>
+    </div>
+
+    <!-- submit -->
+    <button type="submit">Submit Feedback</button>
+  </form>
+
+  <script>
+    document.getElementById("feedbackForm").addEventListener("submit", function(e) {
+      e.preventDefault(); //Prevent regular form submission
+
+      const formData = new FormData(this);
+
+      fetch("/submit_feedback", {
+        method: "POST",
+        body: formData
+      })
+      .then(response => {
+        if (response.ok) {
+          alert("Thank you for taking the time :). Your feedback has been submitted.");
+          document.getElementById("feedbackForm").reset();
+        } else {
+          alert(" Something went wrong. Please try again.");
+        }
+      })
+      .catch(() => {
+        alert(" Server error. Please try again later.");
+      });
+    });
+  </script>
+</body>
+</html>

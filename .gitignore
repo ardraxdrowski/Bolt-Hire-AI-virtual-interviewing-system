@@ -1,0 +1,74 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.pyc
+
+# Virtual Environments
+venv/
+env/
+ENV/
+.venv
+temp_ve/
+
+# Flask
+instance/
+
+# Database files (contain interview data)
+*.db
+*.sqlite
+*.sqlite3
+performance.db
+feedback.db
+
+# Environment variables - CRITICAL
+.env
+.env.local
+.env.production
+
+# Uploads folder (temporary audio files)
+uploads/
+
+# Static generated files
+static/*.wav
+static/*.mp3
+static/output.wav
+
+# Resume and JD files (contain sensitive candidate data)
+Resume.pdf
+JD.txt
+
+# Temporary/utility scripts
+fix_db.py
+setup_db.py
+login.py
+
+# Source/temp folders
+src/
+
+# Models (too large for GitHub)
+*.gguf
+Models/
+D:/Models/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.bak
+
+# Test files
+test_*.py

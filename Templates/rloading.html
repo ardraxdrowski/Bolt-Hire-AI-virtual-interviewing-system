@@ -1,0 +1,75 @@
+<!-- <!DOCTYPE html>
+<html>
+<head>
+    <title>Loading - Bolt-Hire AI</title>
+    <meta http-equiv="refresh" content="3; url=/GuidelinesToU">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="loading-container">
+        <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" class="logo">
+        <h1>BOLT-HIRE AI</h1>
+        <p class="tagline">Delivering interviews at your ease!</p>
+        <div class="spinner"></div>
+    </div>
+</body>
+</html> -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>BoltHire AI - Loading</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background: #f0f4f8;
+      color: #333;
+      margin: 0; 
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      height: 100vh;
+    }
+    .logo {
+      font-size: 3rem;
+      font-weight: bold;
+      margin-bottom: 0.3em;
+      color: #0056d2;
+    }
+    .tagline {
+      font-size: 1.2rem;
+      margin-bottom: 2em;
+      color: #666;
+    }
+    .spinner {
+      border: 8px solid #eee;
+      border-top: 8px solid #0056d2;
+      border-radius: 50%;
+      width: 80px;
+      height: 80px;
+      animation: spin 1.2s linear infinite;
+      margin: 0 auto;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg);}
+      100% { transform: rotate(360deg);}
+    }
+  </style>
+</head>
+<body>
+  <div class="logo">BoltHire AI</div>
+  <div class="tagline">Your personalised Hiring Partner</div>
+  <div class="spinner"></div>
+
+  <script>
+    //Redirect to reclogin page after 4 seconds
+    setTimeout(() => {
+      window.location.href = "/login";
+    }, 5000);
+  </script>
+</body>
+</html>
+

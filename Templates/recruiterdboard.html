@@ -1,0 +1,2515 @@
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recruiter Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .dashboard-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            color: white;
+            padding: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .profile-icon {
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .profile-icon:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+        }
+
+        .profile-icon svg {
+            width: 24px;
+            height: 24px;
+            fill: white;
+        }
+
+        .table-container {
+            padding: 30px;
+            overflow-x: auto;
+        }
+
+        .results-count {
+            margin-bottom: 20px;
+            font-size: 0.95rem;
+            color: #6c757d;
+        }
+
+        .candidates-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .candidates-table thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .candidates-table th {
+            padding: 20px 15px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.95rem;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .header-with-filter {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            align-items: flex-start;
+        }
+
+        .header-filter {
+            padding: 6px 12px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.9);
+            font-size: 0.8rem;
+            color: #333;
+            min-width: 140px;
+            transition: all 0.3s ease;
+            font-family: inherit;
+            text-transform: none;
+            letter-spacing: normal;
+            font-weight: 500;
+        }
+
+        .header-filter:focus {
+            outline: none;
+            border-color: rgba(255, 255, 255, 0.8);
+            box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.2);
+            background: white;
+        }
+
+        .header-filter:hover {
+            background: white;
+            border-color: rgba(255, 255, 255, 0.6);
+        }
+
+        .candidates-table tbody tr {
+            border-bottom: 1px solid #f1f3f4;
+            transition: all 0.3s ease;
+        }
+
+        .candidates-table tbody tr:hover {
+            background: rgba(52, 152, 219, 0.05);
+            transform: scale(1.01);
+        }
+
+        .candidates-table tbody tr.hidden {
+            display: none;
+        }
+
+        .candidates-table td {
+            padding: 20px 15px;
+            vertical-align: middle;
+        }
+
+        .candidate-name {
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 1.1rem;
+        }
+
+        .candidate-email {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+            margin-top: 3px;
+        }
+
+        .position-tag {
+            background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            display: inline-block;
+        }
+
+        .ctc-badge {
+            background: #f8f9fa;
+            color: #495057;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .status-badge {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 500;
+            font-size: 0.9rem;
+            text-align: center;
+            min-width: 100px;
+        }
+
+        .status-rejected {
+            background: #fee;
+            color: #dc3545;
+            border: 1px solid #f5c6cb;
+        }
+
+        .status-shortlisted {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+
+        
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            color: white;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+            color: white;
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .stats-section {
+            padding: 30px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #3498db;
+            margin-bottom: 10px;
+        }
+
+        .stat-label {
+            color: #7f8c8d;
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .header-filter {
+                min-width: 120px;
+                font-size: 0.75rem;
+            }
+
+            .candidates-table {
+                font-size: 0.9rem;
+            }
+
+            .candidates-table th,
+            .candidates-table td {
+                padding: 15px 10px;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 50px;
+            color: #6c757d;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 80px 20px;
+            color: #6c757d;
+        }
+
+        .empty-state h3 {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+         Header 
+        <div class="header">
+            <h1>Recruiter Dashboard</h1>
+            <div class="profile-container">
+               <div class="profile-icon" id="profileIcon">
+                 <svg viewBox="0 0 24 24">
+                       <path d="M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M12,14C16.42,14 20,15.79 20,18V20H4V18C4,15.79 7.58,14 12,14Z"/>
+                 </svg>
+               </div>
+    Profile Dropdown 
+               <div class="profile-dropdown" id="profileDropdown">
+                  <p><strong>Name:</strong> <span id="recruiterName">Test user</span></p>
+                  <p><strong>Email:</strong> <span id="recruiterEmail">testuser@example.com</span></p>
+                  <p><strong>Role:</strong> Recruiter</p>
+                  <button class="btn btn-warning" onclick="logout()">Logout</button>
+               </div>
+            </div>
+        
+        Stats Section
+        <div class="stats-section">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number" id="totalCount">4</div>
+                    <div class="stat-label">Total Candidates</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="pendingCount">1</div>
+                    <div class="stat-label">Pending Interviews</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="shortlistedCount">1</div>
+                    <div class="stat-label">Shortlisted</div>
+                </div>
+                 <div class="stat-card">
+                    <div class="stat-number" id="interviewedCount">1</div>
+                    <div class="stat-label">Interviewed</div>
+                </div> -->
+            <!-- </div>
+        </div>
+
+        Table Container
+        <div class="table-container"> 
+            <!-- Results Count -->
+            <!-- <div class="results-count" id="resultsCount">
+                Showing 4 of 4 candidates
+            </div>
+
+            <table class="candidates-table">
+                <thead>
+                    <tr>
+                        <th>Name & Email</th>
+                        <th>
+                            <div class="header-with-filter">
+                                <span>Position</span>
+                                <select class="header-filter" id="positionFilter">
+                                    <option value="">All Positions</option>
+                                    <option value="Jr.BA">Jr. Business Analyst</option>
+                                    <option value="Product Associate">Product Associate</option>
+                                    <option value="Jr.Developer">Developer</option>
+                                   
+                                </select>
+                            </div>
+                        </th>
+                        <th>Expected CTC</th> -->
+                        <!-- <th>
+                            <div class="header-with-filter">
+                                <span>Status</span>
+                                <select class="header-filter" id="statusFilter">
+                                    <option value="">All Statuses</option>
+                                    <option value="pending">Interview Pending</option>
+                                    <option value="shortlisted">Shortlisted</option>
+                                    
+                                    <option value="rejected">Rejected</option>
+                                </select>
+                            </div>
+                        </th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="candidatesTableBody">
+                    <tr data-position="Jr.BA" data-status="rejected" data-ctc="5">
+                        <td>
+                            <div class="candidate-name">Arjun B</div>
+                            <div class="candidate-email">arjunb@gmail.com</div>
+                        </td>
+                        <td>
+                            <span class="position-tag">Jr. Business Analyst</span>
+                        </td>
+                        <td>
+                            <span class="ctc-badge">5 LPA</span>
+                        </td>
+                        <td>
+                            <span class="status-badge status-rejected">Rejected</span>
+                        </td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="btn btn-primary" onclick="viewFeedback('can1')">View Feedback</button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr data-position="Jr.BA" data-status="shortlisted" data-ctc="6">
+                        <td>
+                            <div class="candidate-name">Manasi Santhosh</div>
+                            <div class="candidate-email">manasisanthoshh@gmail.com</div>
+                        </td>
+                        <td>
+                            <span class="position-tag">Jr. Business Analyst</span>
+                        </td>
+                        <td>
+                            <span class="ctc-badge">6 LPA</span> -->
+                        <!-- </td>
+                        <td>
+                            <span class="status-badge status-shortlisted">Shortlisted</span>
+                        </td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="btn btn-success" onclick="viewFeedback('can2')">View Feedback</button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr data-position="Jr.BA" data-status="pending" data-ctc="5.5">
+                        <td>
+                            <div class="candidate-name">Ardra T J</div>
+                            <div class="candidate-email">ardra.tj1@Orioninc.com</div>
+                        </td>
+                        <td>
+                            <span class="position-tag">Jr. Business Analyst</span>
+                        </td>
+                        <td>
+                            <span class="ctc-badge">7.5 LPA</span>
+                        </td>
+                        <td>
+                            <span class="status-badge status-pending">Interview Pending</span>
+                        </td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="btn btn-primary" onclick="initiateInterview('can3')">Initiate Interview</button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr data-position="Jr.BA" data-status="rejected" data-ctc="8">
+                        <td>
+                            <div class="candidate-name">Thasni D</div>
+                            <div class="candidate-email">thasnidileena@gmail.com</div>
+                        </td>
+                        <td>
+                            <span class="position-tag">Jr. Business Analyst</span>
+                        </td>
+                        <td>
+                            <span class="ctc-badge">8 LPA</span>
+                        </td>
+                        <td>
+                            <span class="status-badge status-rejected">Rejected</span>
+                        </td> -->
+                        <!-- <td>
+                            <div class="action-buttons">
+                                <button class="btn btn-primary" onclick="viewFeedback('can4')">View Feedback</button>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="loading" id="loading">
+                <p>Loading candidates...</p>
+            </div>
+
+            <div class="empty-state" id="emptyState" style="display: none;">
+                <h3>No candidates found</h3>
+                <p>Try adjusting your filters or check back later</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Filter functionality
+        function filterCandidates() {
+            const positionFilter = document.getElementById('positionFilter').value;
+            const statusFilter = document.getElementById('statusFilter').value;
+            
+            const tableBody = document.getElementById('candidatesTableBody');
+            const rows = tableBody.getElementsByTagName('tr');
+            const emptyState = document.getElementById('emptyState');
+            
+            let visibleCount = 0;
+            let statusCounts = {
+                pending: 0,
+                shortlisted: 0,
+                rejected: 0
+            };
+            
+            // Filter each row
+            for (let row of rows) {
+                const position = row.getAttribute('data-position');
+                const status = row.getAttribute('data-status');
+                
+                let showRow = true;
+                
+                // Filter by position
+                if (positionFilter && position !== positionFilter) {
+                    showRow = false;
+                }
+                
+                // Filter by status
+                if (statusFilter && status !== statusFilter) {
+                    showRow = false;
+                }
+                
+                // Show/hide row
+                if (showRow) {
+                    row.classList.remove('hidden');
+                    visibleCount++;
+                    statusCounts[status]++;
+                } else {
+                    row.classList.add('hidden');
+                }
+            }
+            
+            // Update results count
+            document.getElementById('resultsCount').textContent = 
+                `Showing ${visibleCount} of ${rows.length} candidates`;
+            
+            // Update stats
+            document.getElementById('totalCount').textContent = visibleCount;
+            document.getElementById('pendingCount').textContent = statusCounts.pending;
+            document.getElementById('shortlistedCount').textContent = statusCounts.shortlisted;
+             
+            
+            // Show/hide empty state
+            if (visibleCount === 0) {
+                emptyState.style.display = 'block';
+                tableBody.style.display = 'none';
+            } else {
+                emptyState.style.display = 'none';
+                tableBody.style.display = 'table-row-group';
+            }
+        }
+
+        // Add event listeners for filters
+        document.getElementById('positionFilter').addEventListener('change', filterCandidates);
+        document.getElementById('statusFilter').addEventListener('change', filterCandidates);
+
+        // Action functions
+        function viewFeedback(candidateId) {
+            console.log('Viewing feedback for:', candidateId);
+            // Navigate to feedback page
+            window.location.href = `/candidate_feedback/${candidateId}`;
+        }
+
+        function initiateInterview(candidateId) {
+            console.log('Initiating interview for:', candidateId);
+            // Start interview process
+            window.location.href = `/start_interview?candidate=${candidateId}`;
+        }
+
+        // Load candidates data (you'll replace this with actual API call)
+        function loadCandidates() {
+            // Simulate loading
+            document.getElementById('loading').style.display = 'block';
+            
+            setTimeout(() => {
+                document.getElementById('loading').style.display = 'none';
+                // Here you would populate the table with real data from your backend
+                filterCandidates(); // Initialize filter counts
+            }, 1000);
+        }
+
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            loadCandidates();
+        });
+
+        // Profile dropdown toggle
+        const profileIcon = document.getElementById("profileIcon");
+        const profileDropdown = document.getElementById("profileDropdown");
+
+        // Toggle on click
+        profileIcon.addEventListener("click", () => {
+              profileDropdown.style.display = 
+                  profileDropdown.style.display === "block" ? "none" : "block";
+});
+
+        // Hide dropdown when clicking outside
+        document.addEventListener("click", (e) => {
+            if (!profileIcon.contains(e.target) && !profileDropdown.contains(e.target)) {
+               profileDropdown.style.display = "none";
+            } 
+});
+
+        // Example logout function
+        function logout() {
+            window.location.href = "/logout";
+}
+
+    </script>
+</body> --> 
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recruiter Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .dashboard-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            color: white;
+            padding: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .profile-icon {
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .profile-icon:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+        }
+
+        .profile-icon svg {
+            width: 24px;
+            height: 24px;
+            fill: white;
+        }
+
+        .table-container {
+            padding: 30px;
+            overflow-x: auto;
+        }
+
+        .results-count {
+            margin-bottom: 20px;
+            font-size: 0.95rem;
+            color: #6c757d;
+        }
+
+        .candidates-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .candidates-table thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .candidates-table th {
+            padding: 20px 15px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.95rem;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .header-with-filter {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            align-items: flex-start;
+        }
+
+        .header-filter {
+            padding: 6px 12px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.9);
+            font-size: 0.8rem;
+            color: #333;
+            min-width: 140px;
+            transition: all 0.3s ease;
+            font-family: inherit;
+            text-transform: none;
+            letter-spacing: normal;
+            font-weight: 500;
+        }
+
+        .header-filter:focus {
+            outline: none;
+            border-color: rgba(255, 255, 255, 0.8);
+            box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.2);
+            background: white;
+        }
+
+        .header-filter:hover {
+            background: white;
+            border-color: rgba(255, 255, 255, 0.6);
+        }
+
+        .candidates-table tbody tr {
+            border-bottom: 1px solid #f1f3f4;
+            transition: all 0.3s ease;
+        }
+
+        .candidates-table tbody tr:hover {
+            background: rgba(52, 152, 219, 0.05);
+            transform: scale(1.01);
+        }
+
+        .candidates-table tbody tr.hidden {
+            display: none;
+        }
+
+        .candidates-table td {
+            padding: 20px 15px;
+            vertical-align: middle;
+        }
+
+        .candidate-name {
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 1.1rem;
+        }
+
+        .candidate-email {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+            margin-top: 3px;
+        }
+
+        .position-tag {
+            background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            display: inline-block;
+        }
+
+        .ctc-badge {
+            background: #f8f9fa;
+            color: #495057;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .status-badge {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 500;
+            font-size: 0.9rem;
+            text-align: center;
+            min-width: 100px;
+        }
+
+        .status-rejected {
+            background: #fee;
+            color: #dc3545;
+            border: 1px solid #f5c6cb;
+        }
+
+        .status-shortlisted {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+
+        
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            color: white;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+            color: white;
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .stats-section {
+            padding: 30px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #3498db;
+            margin-bottom: 10px;
+        }
+
+        .stat-label {
+            color: #7f8c8d;
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .header-filter {
+                min-width: 120px;
+                font-size: 0.75rem;
+            }
+
+            .candidates-table {
+                font-size: 0.9rem;
+            }
+
+            .candidates-table th,
+            .candidates-table td {
+                padding: 15px 10px;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 50px;
+            color: #6c757d;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 80px 20px;
+            color: #6c757d;
+        }
+
+        .empty-state h3 {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Header -->
+        <div class="header">
+            <h1>Recruiter Dashboard</h1>
+            <div class="profile-icon">
+                <svg viewBox="0 0 24 24">
+                    <path d="M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M12,14C16.42,14 20,15.79 20,18V20H4V18C4,15.79 7.58,14 12,14Z"/>
+                </svg>
+            </div>
+        </div>
+
+        <!-- Stats Section -->
+        <div class="stats-section">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number" id="totalCount">4</div>
+                    <div class="stat-label">Total Candidates</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="pendingCount">1</div>
+                    <div class="stat-label">Pending Interviews</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="shortlistedCount">1</div>
+                    <div class="stat-label">Shortlisted</div>
+                </div>
+                <!-- <div class="stat-card">
+                    <div class="stat-number" id="interviewedCount">1</div>
+                    <div class="stat-label">Interviewed</div>
+                </div> -->
+            </div>
+        </div>
+
+        <!-- Table Container -->
+        <div class="table-container">
+            <!-- Results Count -->
+            <div class="results-count" id="resultsCount">
+                Showing 4 of 4 candidates
+            </div>
+
+            <table class="candidates-table">
+                <thead>
+                    <tr>
+                        <th>Name & Email</th>
+                        <th>
+                            <div class="header-with-filter">
+                                <span>Position</span>
+                                <select class="header-filter" id="positionFilter">
+                                    <option value="">All Positions</option>
+                                    <option value="Jr.BA">Jr. Business Analyst</option>
+                                    <option value="Product Associate">Product Associate</option>
+                                    <option value="Jr.Developer">Developer</option>
+                                   
+                                </select>
+                            </div>
+                        </th>
+                        <th>Expected CTC</th>
+                        <th>
+                            <div class="header-with-filter">
+                                <span>Status</span>
+                                <select class="header-filter" id="statusFilter">
+                                    <option value="">All Statuses</option>
+                                    <option value="pending">Interview Pending</option>
+                                    <option value="shortlisted">Shortlisted</option>
+                                    
+                                    <option value="rejected">Rejected</option>
+                                </select>
+                            </div>
+                        </th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="candidatesTableBody">
+                    <tr data-position="Jr.BA" data-status="rejected" data-ctc="5">
+                        <td>
+                            <div class="candidate-name">Arjun B</div>
+                            <div class="candidate-email">arjunb@gmail.com</div>
+                        </td>
+                        <td>
+                            <span class="position-tag">Jr. Business Analyst</span>
+                        </td>
+                        <td>
+                            <span class="ctc-badge">5 LPA</span>
+                        </td>
+                        <td>
+                            <span class="status-badge status-rejected">Rejected</span>
+                        </td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="btn btn-primary" onclick="viewFeedback('can1')">View Feedback</button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr data-position="Jr.BA" data-status="shortlisted" data-ctc="6">
+                        <td>
+                            <div class="candidate-name">Manasi Santhosh</div>
+                            <div class="candidate-email">manasisanthoshh@gmail.com</div>
+                        </td>
+                        <td>
+                            <span class="position-tag">Jr. Business Analyst</span>
+                        </td>
+                        <td>
+                            <span class="ctc-badge">6 LPA</span>
+                        </td>
+                        <td>
+                            <span class="status-badge status-shortlisted">Shortlisted</span>
+                        </td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="btn btn-success" onclick="viewFeedback('can2')">View Feedback</button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr data-position="Jr.BA" data-status="pending" data-ctc="5.5">
+                        <td>
+                            <div class="candidate-name">Ardra T J</div>
+                            <div class="candidate-email">ardratj@yahoo.com</div>
+                        </td>
+                        <td>
+                            <span class="position-tag">Jr. Business Analyst</span>
+                        </td>
+                        <td>
+                            <span class="ctc-badge">5.5 LPA</span>
+                        </td>
+                        <td>
+                            <span class="status-badge status-pending">Interview Pending</span>
+                        </td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="btn btn-primary" onclick="initiateInterview('can3')">Initiate Interview</button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr data-position="Jr.BA" data-status="rejected" data-ctc="8">
+                        <td>
+                            <div class="candidate-name">Thasni D</div>
+                            <div class="candidate-email">thasnidileena@gmail.com</div>
+                        </td>
+                        <td>
+                            <span class="position-tag">Jr. Business Analyst</span>
+                        </td>
+                        <td>
+                            <span class="ctc-badge">8 LPA</span>
+                        </td>
+                        <td>
+                            <span class="status-badge status-rejected">Rejected</span>
+                        </td>
+                        <td>
+                            <div class="action-buttons">
+
+                                <button class="btn btn-primary" onclick="viewFeedback('can4')">View Feedback</button>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="loading" id="loading">
+                <p>Loading candidates...</p>
+            </div>
+
+            <div class="empty-state" id="emptyState" style="display: none;">
+                <h3>No candidates found</h3>
+                <p>Try adjusting your filters or check back later</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Filter functionality
+        function filterCandidates() {
+            const positionFilter = document.getElementById('positionFilter').value;
+            const statusFilter = document.getElementById('statusFilter').value;
+            
+            const tableBody = document.getElementById('candidatesTableBody');
+            const rows = tableBody.getElementsByTagName('tr');
+            const emptyState = document.getElementById('emptyState');
+            
+            let visibleCount = 0;
+            let statusCounts = {
+                pending: 0,
+                shortlisted: 0,
+                rejected: 0
+            };
+            
+            // Filter each row
+            for (let row of rows) {
+                const position = row.getAttribute('data-position');
+                const status = row.getAttribute('data-status');
+                
+                let showRow = true;
+                
+                // Filter by position
+                if (positionFilter && position !== positionFilter) {
+                    showRow = false;
+                }
+                
+                // Filter by status
+                if (statusFilter && status !== statusFilter) {
+                    showRow = false;
+                }
+                
+                // Show/hide row
+                if (showRow) {
+                    row.classList.remove('hidden');
+                    visibleCount++;
+                    statusCounts[status]++;
+                } else {
+                    row.classList.add('hidden');
+                }
+            }
+            
+            // Update results count
+            document.getElementById('resultsCount').textContent = 
+                `Showing ${visibleCount} of ${rows.length} candidates`;
+            
+            // Update stats
+            document.getElementById('totalCount').textContent = visibleCount;
+            document.getElementById('pendingCount').textContent = statusCounts.pending;
+            document.getElementById('shortlistedCount').textContent = statusCounts.shortlisted;
+             
+            
+            // Show/hide empty state
+            if (visibleCount === 0) {
+                emptyState.style.display = 'block';
+                tableBody.style.display = 'none';
+            } else {
+                emptyState.style.display = 'none';
+                tableBody.style.display = 'table-row-group';
+            }
+        }
+
+        // Add event listeners for filters
+        document.getElementById('positionFilter').addEventListener('change', filterCandidates);
+        document.getElementById('statusFilter').addEventListener('change', filterCandidates);
+
+        // Action functions
+        function viewFeedback(candidateName) {
+                window.location.href = `/candidate_performance/${encodeURIComponent(candidateName)}`;
+}
+
+        // function viewFeedback(candidateId) {
+        //     console.log('Viewing feedback for:', candidateId);
+        //     // Navigate to feedback page
+        //     window.location.href = `/candidate_feedback/${candidateId}`;
+        // }
+
+        function initiateInterview(candidateId) {
+                // Get candidate data from the row
+                 const row = event.target.closest('tr');
+                 const candidateName = row.querySelector('.candidate-name').textContent;
+                 const candidateEmail = row.querySelector('.candidate-email').textContent;
+                 const position = row.querySelector('.position-tag').textContent;
+    
+                 const button = event.target;
+                 const originalText = button.textContent;
+                 button.textContent = '📧 Sending Email...';
+                 button.disabled = true;
+                 button.style.opacity = '0.7';
+    
+    // Send interview invitation email
+                fetch('/send_interview_invite', {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                       candidate_email: candidateEmail,
+                       candidate_name: candidateName,
+                       recruiter_name: '{{ name }}',  // This will use the recruiter's name from Flask
+                       job_role: position
+                       })
+                })
+                .then(response => response.json())
+                .then(data => {
+                   if (data.success) {
+                        alert('✅ Interview invitation sent successfully to ' + candidateName + '!\n\nThe candidate will receive an email with the interview link.');
+                        button.textContent = '✅ Invitation Sent';
+                        button.style.backgroundColor = '#27ae60';
+                        button.style.opacity = '1';
+            
+                        // Optionally update the status badge
+                        const statusBadge = row.querySelector('.status-badge');
+                        statusBadge.textContent = 'Invited';
+                        statusBadge.className = 'status-badge status-shortlisted';
+                    } else {
+                        alert('❌ Failed to send invitation: ' + data.message);
+                        button.textContent = originalText;
+                        button.disabled = false;
+                        button.style.opacity = '1';
+                    }
+                })
+                .catch(error => {
+                     console.error('Error:', error);
+                     alert('❌ Error sending invitation. Please check your email configuration and try again.');
+                     button.textContent = originalText;
+                     button.disabled = false;
+                     button.style.opacity = '1';
+                });
+}
+        
+
+        // Load candidates data (you'll replace this with actual API call)
+        function loadCandidates() {
+            // Simulate loading
+            document.getElementById('loading').style.display = 'block';
+            
+            setTimeout(() => {
+                document.getElementById('loading').style.display = 'none';
+                // Here you would populate the table with real data from your backend
+                filterCandidates(); // Initialize filter counts
+            }, 1000);
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            loadCandidates();
+        });
+    </script>
+</body>
+ 
+<!-- </html><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recruiter Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .dashboard-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            color: white;
+            padding: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .profile-icon {
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .profile-icon:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+        }
+
+        .profile-icon svg {
+            width: 24px;
+            height: 24px;
+            fill: white;
+        }
+
+        .table-container {
+            padding: 30px;
+            overflow-x: auto;
+        }
+
+        .results-count {
+            margin-bottom: 20px;
+            font-size: 0.95rem;
+            color: #6c757d;
+        }
+
+        .candidates-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .candidates-table thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .candidates-table th {
+            padding: 20px 15px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.95rem;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .header-with-filter {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            align-items: flex-start;
+        }
+
+        .header-filter {
+            padding: 6px 12px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.9);
+            font-size: 0.8rem;
+            color: #333;
+            min-width: 140px;
+            transition: all 0.3s ease;
+            font-family: inherit;
+            text-transform: none;
+            letter-spacing: normal;
+            font-weight: 500;
+        }
+
+        .header-filter:focus {
+            outline: none;
+            border-color: rgba(255, 255, 255, 0.8);
+            box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.2);
+            background: white;
+        }
+
+        .header-filter:hover {
+            background: white;
+            border-color: rgba(255, 255, 255, 0.6);
+        }
+
+        .candidates-table tbody tr {
+            border-bottom: 1px solid #f1f3f4;
+            transition: all 0.3s ease;
+        }
+
+        .candidates-table tbody tr:hover {
+            background: rgba(52, 152, 219, 0.05);
+            transform: scale(1.01);
+        }
+
+        .candidates-table tbody tr.hidden {
+            display: none;
+        }
+
+        .candidates-table td {
+            padding: 20px 15px;
+            vertical-align: middle;
+        }
+
+        .candidate-name {
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 1.1rem;
+        }
+
+        .candidate-email {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+            margin-top: 3px;
+        }
+
+        .position-tag {
+            background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            display: inline-block;
+        }
+
+        .ctc-badge {
+            background: #f8f9fa;
+            color: #495057;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .status-badge {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 500;
+            font-size: 0.9rem;
+            text-align: center;
+            min-width: 100px;
+        }
+
+        .status-rejected {
+            background: #fee;
+            color: #dc3545;
+            border: 1px solid #f5c6cb;
+        }
+
+        .status-shortlisted {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+
+       
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            color: white;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+            color: white;
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .stats-section {
+            padding: 30px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #3498db;
+            margin-bottom: 10px;
+        }
+
+        .stat-label {
+            color: #7f8c8d;
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .header-filter {
+                min-width: 120px;
+                font-size: 0.75rem;
+            }
+
+            .candidates-table {
+                font-size: 0.9rem;
+            }
+
+            .candidates-table th,
+            .candidates-table td {
+                padding: 15px 10px;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 50px;
+            color: #6c757d;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 80px 20px;
+            color: #6c757d;
+        }
+
+        .empty-state h3 {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Header 
+        <div class="header">
+            <h1>Recruiter Dashboard</h1>
+            <div class="profile-icon">
+                <svg viewBox="0 0 24 24">
+                    <path d="M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M12,14C16.42,14 20,15.79 20,18V20H4V18C4,15.79 7.58,14 12,14Z"/>
+                </svg>
+            </div>
+        </div>
+
+        <!-- Stats Section 
+        <div class="stats-section">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number" id="totalCount">4</div>
+                    <div class="stat-label">Total Candidates</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="pendingCount">1</div>
+                    <div class="stat-label">Pending Interviews</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="shortlistedCount">1</div>
+                    <div class="stat-label">Shortlisted</div>
+                </div>
+              
+            </div>
+        </div>
+
+        <!-- Table Container 
+        <div class="table-container">
+            <!-- Results Count 
+            <div class="results-count" id="resultsCount">
+                Showing 4 of 4 candidates
+            </div>
+
+            <table class="candidates-table">
+                <thead>
+                    <tr>
+                        <th>Name & Email</th>
+                        <th>
+                            <div class="header-with-filter">
+                                <span>Position</span>
+                                <select class="header-filter" id="positionFilter">
+                                    <option value="">All Positions</option>
+                                    <option value="Jr.BA">Jr. Business Analyst</option>
+                                    <option value="Sr.BA">Sr. Business Analyst</option>
+                                    <option value="Developer">Developer</option>
+                                    <option value="Manager">Manager</option>
+                                </select>
+                            </div>
+                        </th>
+                        <th>Expected CTC</th>
+                        <th>
+                            <div class="header-with-filter">
+                                <span>Status</span>
+                                <select class="header-filter" id="statusFilter">
+                                    <option value="">All Statuses</option>
+                                    <option value="pending">Interview Pending</option>
+                                    <option value="shortlisted">Shortlisted</option>
+                                     
+                                    <option value="rejected">Rejected</option>
+                                </select>
+                            </div>
+                        </th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="candidatesTableBody">
+                    <tr data-position="Jr.BA" data-status="rejected" data-ctc="5">
+                        <td>
+                            <div class="candidate-name">Arjun Krishnan</div>
+                            <div class="candidate-email">arjun.k@email.com</div>
+                        </td>
+                        <td>
+                            <span class="position-tag">Jr. Business Analyst</span>
+                        </td>
+                        <td>
+                            <span class="ctc-badge">5 LPA</span>
+                        </td>
+                        <td>
+                            <span class="status-badge status-rejected">Rejected</span>
+                        </td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="btn btn-primary" onclick="viewFeedback('can1')">View Feedback</button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr data-position="Jr.BA" data-status="shortlisted" data-ctc="6">
+                        <td>
+                            <div class="candidate-name">Priya Sharma</div>
+                            <div class="candidate-email">priya.s@email.com</div>
+                        </td>
+                        <td>
+                            <span class="position-tag">Jr. Business Analyst</span>
+                        </td>
+                        <td>
+                            <span class="ctc-badge">6 LPA</span>
+                        </td>
+                        <td>
+                            <span class="status-badge status-shortlisted">Shortlisted</span>
+                        </td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="btn btn-success" onclick="viewFeedback('can2')">View Feedback</button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr data-position="Jr.BA" data-status="pending" data-ctc="5.5">
+                        <td>
+                            <div class="candidate-name">Ardra T J</div>
+                            <div class="candidate-email">ardratj4@gmail.com</div>
+                        </td>
+                        <td>
+                            <span class="position-tag">Jr. Business Analyst</span>
+                        </td>
+                        <td>
+                            <span class="ctc-badge">5.5 LPA</span>
+                        </td>
+                        <td>
+                            <span class="status-badge status-pending">Interview Pending</span>
+                        </td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="btn btn-primary" onclick="initiateInterview('can3')">Initiate Interview</button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr data-position="Jr.BA" data-status="rejected" data-ctc="8">
+                        <td>
+                            <div class="candidate-name">Sneha Nair</div>
+                            <div class="candidate-email">sneha.n@email.com</div>
+                        </td>
+                        <td>
+                            <span class="position-tag">Jr. Business Analyst</span>
+                        </td>
+                        <td>
+                            <span class="ctc-badge">8 LPA</span>
+                        </td>
+                        <td>
+                            <span class="status-badge status-rejected">Rejected</span>
+                        </td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="btn btn-primary" onclick="viewFeedback('can4')">View Feedback</button>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="loading" id="loading">
+                <p>Loading candidates...</p>
+            </div>
+
+            <div class="empty-state" id="emptyState" style="display: none;">
+                <h3>No candidates found</h3>
+                <p>Try adjusting your filters or check back later</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Filter functionality
+        function filterCandidates() {
+            const positionFilter = document.getElementById('positionFilter').value;
+            const statusFilter = document.getElementById('statusFilter').value;
+            
+            const tableBody = document.getElementById('candidatesTableBody');
+            const rows = tableBody.getElementsByTagName('tr');
+            const emptyState = document.getElementById('emptyState');
+            
+            let visibleCount = 0;
+            let statusCounts = {
+                pending: 0,
+                shortlisted: 0,
+                 
+                rejected: 0
+            };
+            
+            // Filter each row
+            for (let row of rows) {
+                const position = row.getAttribute('data-position');
+                const status = row.getAttribute('data-status');
+                
+                let showRow = true;
+                
+                // Filter by position
+                if (positionFilter && position !== positionFilter) {
+                    showRow = false;
+                }
+                
+                // Filter by status
+                if (statusFilter && status !== statusFilter) {
+                    showRow = false;
+                }
+                
+                // Show/hide row
+                if (showRow) {
+                    row.classList.remove('hidden');
+                    visibleCount++;
+                    statusCounts[status]++;
+                } else {
+                    row.classList.add('hidden');
+                }
+            }
+            
+            // Update results count
+            document.getElementById('resultsCount').textContent = 
+                `Showing ${visibleCount} of ${rows.length} candidates`;
+            
+            // Update stats
+            document.getElementById('totalCount').textContent = visibleCount;
+            document.getElementById('pendingCount').textContent = statusCounts.pending;
+            document.getElementById('shortlistedCount').textContent = statusCounts.shortlisted;
+           
+            
+            // Show/hide empty state
+            if (visibleCount === 0) {
+                emptyState.style.display = 'block';
+                tableBody.style.display = 'none';
+            } else {
+                emptyState.style.display = 'none';
+                tableBody.style.display = 'table-row-group';
+            }
+        }
+
+        // Add event listeners for filters
+        document.getElementById('positionFilter').addEventListener('change', filterCandidates);
+        document.getElementById('statusFilter').addEventListener('change', filterCandidates);
+
+        // Action functions
+        function viewFeedback(candidateId) {
+            console.log('Viewing feedback for:', candidateId);
+            // Navigate to feedback page
+            window.location.href = `/candidate_feedback/${candidateId}`;
+        }
+
+        function initiateInterview(candidateId) {
+            console.log('Initiating interview for:', candidateId);
+            // Start interview process
+            window.location.href = `/start_interview?candidate=${candidateId}`;
+        }
+
+        // Load candidates data (you'll replace this with actual API call)
+        function loadCandidates() {
+            // Simulate loading
+            document.getElementById('loading').style.display = 'block';
+            
+            setTimeout(() => {
+                document.getElementById('loading').style.display = 'none';
+                // Here you would populate the table with real data from your backend
+                filterCandidates(); // Initialize filter counts
+            }, 1000);
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            loadCandidates();
+        });
+    </script>
+</body>
+</html><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recruiter Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .dashboard-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            color: white;
+            padding: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .profile-icon {
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .profile-icon:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+        }
+
+        .profile-icon svg {
+            width: 24px;
+            height: 24px;
+            fill: white;
+        }
+
+        .table-container {
+            padding: 30px;
+            overflow-x: auto;
+        }
+
+        .results-count {
+            margin-bottom: 20px;
+            font-size: 0.95rem;
+            color: #6c757d;
+        }
+
+        .candidates-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .candidates-table thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .candidates-table th {
+            padding: 20px 15px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.95rem;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .header-with-filter {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            align-items: flex-start;
+        }
+
+        .header-filter {
+            padding: 6px 12px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.9);
+            font-size: 0.8rem;
+            color: #333;
+            min-width: 140px;
+            transition: all 0.3s ease;
+            font-family: inherit;
+            text-transform: none;
+            letter-spacing: normal;
+            font-weight: 500;
+        }
+
+        .header-filter:focus {
+            outline: none;
+            border-color: rgba(255, 255, 255, 0.8);
+            box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.2);
+            background: white;
+        }
+
+        .header-filter:hover {
+            background: white;
+            border-color: rgba(255, 255, 255, 0.6);
+        }
+
+        .candidates-table tbody tr {
+            border-bottom: 1px solid #f1f3f4;
+            transition: all 0.3s ease;
+        }
+
+        .candidates-table tbody tr:hover {
+            background: rgba(52, 152, 219, 0.05);
+            transform: scale(1.01);
+        }
+
+        .candidates-table tbody tr.hidden {
+            display: none;
+        }
+
+        .candidates-table td {
+            padding: 20px 15px;
+            vertical-align: middle;
+        }
+
+        .candidate-name {
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 1.1rem;
+        }
+
+        .candidate-email {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+            margin-top: 3px;
+        }
+
+        .position-tag {
+            background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            display: inline-block;
+        }
+
+        .ctc-badge {
+            background: #f8f9fa;
+            color: #495057;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .status-badge {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 500;
+            font-size: 0.9rem;
+            text-align: center;
+            min-width: 100px;
+        }
+
+        .status-rejected {
+            background: #fee;
+            color: #dc3545;
+            border: 1px solid #f5c6cb;
+        }
+
+        .status-shortlisted {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+
+        
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            color: white;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+            color: white;
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .stats-section {
+            padding: 30px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #3498db;
+            margin-bottom: 10px;
+        }
+
+        .stat-label {
+            color: #7f8c8d;
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .header-filter {
+                min-width: 120px;
+                font-size: 0.75rem;
+            }
+
+            .candidates-table {
+                font-size: 0.9rem;
+            }
+
+            .candidates-table th,
+            .candidates-table td {
+                padding: 15px 10px;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 50px;
+            color: #6c757d;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 80px 20px;
+            color: #6c757d;
+        }
+
+        .empty-state h3 {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Header 
+        <div class="header">
+            <h1>Recruiter Dashboard</h1>
+            <div class="profile-icon">
+                <svg viewBox="0 0 24 24">
+                    <path d="M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M12,14C16.42,14 20,15.79 20,18V20H4V18C4,15.79 7.58,14 12,14Z"/>
+                </svg>
+            </div>
+        </div>
+
+        <!-- Stats Section 
+        <div class="stats-section">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number" id="totalCount">4</div>
+                    <div class="stat-label">Total Candidates</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="pendingCount">1</div>
+                    <div class="stat-label">Pending Interviews</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="shortlistedCount">1</div>
+                    <div class="stat-label">Shortlisted</div>
+                </div>
+                 
+            </div>
+        </div>
+
+        <!-- Table Container 
+        <div class="table-container">
+            <!-- Results Count 
+            <div class="results-count" id="resultsCount">
+                Showing 4 of 4 candidates
+            </div>
+
+            <table class="candidates-table">
+                <thead>
+                    <tr>
+                        <th>Name & Email</th>
+                        <th>
+                            <div class="header-with-filter">
+                                <span>Position</span>
+                                <select class="header-filter" id="positionFilter">
+                                    <option value="">All Positions</option>
+                                    <option value="Jr.BA">Jr. Business Analyst</option>
+                                    <option value="Sr.BA">Sr. Business Analyst</option>
+                                    <option value="Developer">Developer</option>
+                                    <option value="Manager">Manager</option>
+                                </select>
+                            </div>
+                        </th>
+                        <th>Expected CTC</th>
+                        <th>
+                            <div class="header-with-filter">
+                                <span>Status</span>
+                                <select class="header-filter" id="statusFilter">
+                                    <option value="">All Statuses</option>
+                                    <option value="pending">Interview Pending</option>
+                                    <option value="shortlisted">Shortlisted</option>
+                      
+                                    <option value="rejected">Rejected</option>
+                                </select>
+                            </div>
+                        </th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="candidatesTableBody">
+                    <tr data-position="Jr.BA" data-status="rejected" data-ctc="5">
+                        <td>
+                            <div class="candidate-name">Arjun Krishnan</div>
+                            <div class="candidate-email">arjun.k@email.com</div>
+                        </td>
+                        <td>
+                            <span class="position-tag">Jr. Business Analyst</span>
+                        </td>
+                        <td>
+                            <span class="ctc-badge">5 LPA</span>
+                        </td>
+                        <td>
+                            <span class="status-badge status-rejected">Rejected</span>
+                        </td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="btn btn-primary" onclick="viewFeedback('can1')">View Feedback</button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr data-position="Jr.BA" data-status="shortlisted" data-ctc="6">
+                        <td>
+                            <div class="candidate-name">Priya Sharma</div>
+                            <div class="candidate-email">priya.s@email.com</div>
+                        </td>
+                        <td>
+                            <span class="position-tag">Jr. Business Analyst</span>
+                        </td>
+                        <td>
+                            <span class="ctc-badge">6 LPA</span>
+                        </td>
+                        <td>
+                            <span class="status-badge status-shortlisted">Shortlisted</span>
+                        </td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="btn btn-success" onclick="viewFeedback('can2')">View Feedback</button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr data-position="Jr.BA" data-status="pending" data-ctc="5.5">
+                        <td>
+                            <div class="candidate-name">Ardra T J</div>
+                            <div class="candidate-email">ardra.tj1@Orioninc.com</div>
+                        </td>
+                        <td>
+                            <span class="position-tag">Jr. Business Analyst</span>
+                        </td>
+                        <td>
+                            <span class="ctc-badge">5.5 LPA</span>
+                        </td>
+                        <td>
+                            <span class="status-badge status-pending">Interview Pending</span>
+                        </td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="btn btn-primary" onclick="initiateInterview('can3')">Initiate Interview</button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr data-position="Jr.BA" data-status="rejected" data-ctc="8">
+                        <td>
+                            <div class="candidate-name">Sneha Nair</div>
+                            <div class="candidate-email">sneha.n@email.com</div>
+                        </td>
+                        <td>
+                            <span class="position-tag">Sr. Business Analyst</span>
+                        </td>
+                        <td>
+                            <span class="ctc-badge">8 LPA</span>
+                        </td>
+                        <td>
+                            <span class="status-badge status-rejected">Rejected</span>
+                        </td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="btn btn-primary" onclick="viewFeedback('can4')">View Feedback</button>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="loading" id="loading">
+                <p>Loading candidates...</p>
+            </div>
+
+            <div class="empty-state" id="emptyState" style="display: none;">
+                <h3>No candidates found</h3>
+                <p>Try adjusting your filters or check back later</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Filter functionality
+        function filterCandidates() {
+            const positionFilter = document.getElementById('positionFilter').value;
+            const statusFilter = document.getElementById('statusFilter').value;
+            
+            const tableBody = document.getElementById('candidatesTableBody');
+            const rows = tableBody.getElementsByTagName('tr');
+            const emptyState = document.getElementById('emptyState');
+            
+            let visibleCount = 0;
+            let statusCounts = {
+                pending: 0,
+                shortlisted: 0,
+              
+                rejected: 0
+            };
+            
+            // Filter each row
+            for (let row of rows) {
+                const position = row.getAttribute('data-position');
+                const status = row.getAttribute('data-status');
+                
+                let showRow = true;
+                
+                // Filter by position
+                if (positionFilter && position !== positionFilter) {
+                    showRow = false;
+                }
+                
+                // Filter by status
+                if (statusFilter && status !== statusFilter) {
+                    showRow = false;
+                }
+                
+                // Show/hide row
+                if (showRow) {
+                    row.classList.remove('hidden');
+                    visibleCount++;
+                    statusCounts[status]++;
+                } else {
+                    row.classList.add('hidden');
+                }
+            }
+            
+            // Update results count
+            document.getElementById('resultsCount').textContent = 
+                `Showing ${visibleCount} of ${rows.length} candidates`;
+            
+            // Update stats
+            document.getElementById('totalCount').textContent = visibleCount;
+            document.getElementById('pendingCount').textContent = statusCounts.pending;
+            document.getElementById('shortlistedCount').textContent = statusCounts.shortlisted;
+       
+            
+            // Show/hide empty state
+            if (visibleCount === 0) {
+                emptyState.style.display = 'block';
+                tableBody.style.display = 'none';
+            } else {
+                emptyState.style.display = 'none';
+                tableBody.style.display = 'table-row-group';
+            }
+        }
+
+        // Add event listeners for filters
+        document.getElementById('positionFilter').addEventListener('change', filterCandidates);
+        document.getElementById('statusFilter').addEventListener('change', filterCandidates);
+
+        // Action functions
+        function viewFeedback(candidateId) {
+            console.log('Viewing feedback for:', candidateId);
+            // Navigate to feedback page
+            window.location.href = `/candidate_feedback/${candidateId}`;
+        }
+
+        function initiateInterview(candidateId) {
+            console.log('Initiating interview for:', candidateId);
+            // Start interview process
+            window.location.href = `/start_interview?candidate=${candidateId}`;
+        }
+
+        // Load candidates data (you'll replace this with actual API call)
+        function loadCandidates() {
+            // Simulate loading
+            document.getElementById('loading').style.display = 'block';
+            
+            setTimeout(() => {
+                document.getElementById('loading').style.display = 'none';
+                // Here you would populate the table with real data from your backend
+                filterCandidates(); // Initialize filter counts
+            }, 1000);
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            loadCandidates();
+        });
+    </script>
+</body>
+</html> -->

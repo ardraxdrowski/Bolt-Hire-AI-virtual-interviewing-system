@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Candidate Performance Report</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f0f0f0;
+        }
+
+        .summary {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Performance Report: {{ candidate_name }}</h1>
+
+    {% if session_summary %}
+        <div class="summary">
+            <h2>Session Summary</h2>
+            <p><b>Start Time:</b> {{ session_summary['start_time'] }}</p>
+            <p><b>End Time:</b> {{ session_summary['end_time'] }}</p>
+            <p><b>Final Scores:</b></p>
+            <pre>{{ session_summary['final_scores'] }}</pre>
+        </div>
+    {% else %}
+        <p>No session summary available for today.</p>
+    {% endif %}
+
+    <h2>Detailed Q&A Performance</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Timestamp</th>
+                <th>Question</th>
+                <th>Answer</th>
+                <th>Technical</th>
+                <th>Communication</th>
+                <th>Critical Thinking</th>
+                <th>Teamwork</th>
+                <th>Leadership</th>
+                <th>Overall</th>
+                <th>Percentile</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in performance_data %}
+            <tr>
+                <td>{{ row['ts'] }}</td>
+                <td>{{ row['question'] }}</td>
+                <td>{{ row['answer'] }}</td>
+                <td>{{ row['tech_score'] }}</td>
+                <td>{{ row['comm_score'] }}</td>
+                <td>{{ row['crit_score'] }}</td>
+                <td>{{ row['team_score'] }}</td>
+                <td>{{ row['leadership_score'] }}</td>
+                <td>{{ row['overall_score'] }}</td>
+                <td>{{ row['percentile'] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+
+</html>

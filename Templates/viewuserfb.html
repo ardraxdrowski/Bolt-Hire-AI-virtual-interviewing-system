@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Feedback Submissions</title>
+  <style>
+    body { font-family: Arial; padding: 20px; }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+    th { background-color: #eee; }
+  </style>
+</head>
+<body>
+  <h1>User experience Feedback</h1>
+  <table>
+    <thead>
+      <tr>
+        <th>Timestamp</th>
+        <th>Interface</th>
+        <th>Relevance</th>
+        <th>Flow</th>
+        <th>Comfort</th>
+        <th>Mode</th>
+        <th>Issues</th>
+        <th>Issue Details</th>
+        <th>Suggestions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for f in feedbacks %}
+      <tr>
+        <td>{{ f.timestamp }}</td>
+        <td>{{ f.interface_rating }}</td>
+        <td>{{ f.relevance_rating }}</td>
+        <td>{{ f.flow_rating }}</td>
+        <td>{{ f.comfort_rating }}</td>
+        <td>{{ f.mode }}</td>
+        <td>{{ f.issues }}</td>
+        <td>{{ f.issue_details }}</td>
+        <td>{{ f.suggestions }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</body>
+</html>
