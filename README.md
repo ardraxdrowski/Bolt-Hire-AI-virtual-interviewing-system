@@ -282,7 +282,7 @@ bolt-hire-ai/
 |--------|----------|-------------|
 | `GET` | `/vInterview` | Voice interview interface |
 | `GET` | `/texInterview` | Text interview interface |
-| `POST` | `/start_interview` | Initialize interview session |
+| `POST` | `/start_interview` | Initialise interview session |
 | `POST` | `/ask` | Submit text answer |
 | `POST` | `/transcribe` | Submit voice answer |
 | `POST` | `/speak` | Generate TTS audio |
