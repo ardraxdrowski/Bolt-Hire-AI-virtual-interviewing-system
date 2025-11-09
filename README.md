@@ -126,11 +126,11 @@ cd bolt-hire-ai
 
 ### Step 2: Create Virtual Environment
 ```bash
-# Windows
+#Windows
 python -m venv venv
 venv\Scripts\activate
 
-# Linux/Mac
+#Linux/Mac
 python3 -m venv venv
 source venv/bin/activate
 ```
@@ -148,21 +148,21 @@ Download a Llama model in GGUF format (recommended: Mistral 7B Instruct Q4_K_M) 
 
 Create a `.env` file in the project root:
 ```bash
-# Copy the example file
+#Copy the example file
 cp .env.example .env
 ```
 
 Add your credentials:
 ```env
-# SendGrid Email Configuration
+#SendGrid Email Configuration
 SENDGRID_API_KEY=your-sendgrid-api-key-here
 FROM_EMAIL=your-verified-email@yourdomain.com
 FROM_NAME=Your Company Name
 
-# Flask Secret Key
+#Flask Secret Key
 SECRET_KEY=your-secret-key-here
 
-# Model Path
+#Model Path
 MODEL_PATH=path/to/your/model.gguf
 ```
 
