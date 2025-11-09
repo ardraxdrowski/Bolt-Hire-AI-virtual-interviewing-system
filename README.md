@@ -166,7 +166,7 @@ SECRET_KEY=your-secret-key-here
 MODEL_PATH=path/to/your/model.gguf
 ```
 
-### Step 6: Initialize Database
+### Step 6: Initialise Database
 ```bash
 python App.py
 ```
@@ -234,7 +234,7 @@ The application will start on `http://localhost:5000`
 ### For Candidates
 
 1. **Receive Email**: Open invitation email and click the interview link
-2. **Choose Mode**: Select Voice or Text interview mode
+2. **Choose Mode**: Select Voice or Text interview mode dynamically( switchable in between too)
 3. **Complete Interview**: Answer 15 questions naturally
 
 ---
